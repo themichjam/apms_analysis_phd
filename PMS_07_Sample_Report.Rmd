@@ -1,0 +1,263 @@
+---
+title: "PMS '07 Sample Report"
+author: "Michelle K Jamieson"
+date: "20/07/2020"
+output: pdf_document
+---
+# Introduction 
+
+Exploring a small section of the Psychiatric Morbidity Survey (2007).
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(gmodels)
+library(skimr)
+library(knitr)
+library(tidyverse)
+library(haven)
+library(sjlabelled)
+library(labelled) 
+library(sjPlot)
+library(psych)
+```
+
+#Read In and View
+
+Read in the data via Haven package as only available in SPSS or SAS format. Take a look as this will usually need cleaning and sorting out of factor type levels to be useable. 
+```{r}
+# read in 
+source_pms07 <- haven::read_sav("pms07.sav")
+
+
+# Subsetting to manage descriptive, work, and health variables
+subset_pms07 <- source_pms07[,c("pserial", "ResSex", "ResAge", "SF1", 
+                                "Happy", "Health6", "Everwk", "Psycdis")]
+head(subset_pms07)
+
+
+
+# view 
+subset_pms07 %>% sjPlot::view_df()
+glimpse(subset_pms07)
+```
+
+# Cleaning subset of data
+
+Cleaning has involved fixing labels, renaming variables, and importantly making sure levels are correct. 
+
+```{r}
+
+# Change Labels for easier reading
+attr(subset_pms07$pserial, "label") <- "Serial Number"
+attr(subset_pms07$ResSex, "label") <- "Respondant Sex"
+attr(subset_pms07$ResAge, "label") <- "Respondant Age"
+attr(subset_pms07$SF1, "label") <- "General Health"
+attr(subset_pms07$Happy, "label") <- "How Happy Are You?"
+attr(subset_pms07$Health6, "label") <- "Mental Health Condition Mentioned"
+attr(subset_pms07$Everwk, "label") <- "Ever Had a Paid Job"
+attr(subset_pms07$Psycdis, "label") <- "Definitive Psychosis in Last Year"
+
+# check it worked
+subset_pms07 %>% sjPlot::view_df()
+
+# look at variable names 
+colnames(subset_pms07)
+
+# rename variables for easier reading 
+subset_pms07 <- subset_pms07 %>% rename(SerNum = pserial, Sex = ResSex, 
+                                        Age = ResAge, GenHeal = SF1, 
+                                        HowHap = Happy, MenHeal = Health6, 
+                                        PaidJob = Everwk, DefPsych = Psycdis) 
+# check it worked 
+colnames(subset_pms07)
+
+
+# Apart from the age variable which was set to factor, the rest of the 
+#variables will need to be set to the right type/class. 
+#As a general rule for survey analysis, respondent IDs should be set as 
+#character, and categorical variables as factor. Here’s what we’ll do:
+subset_pms07$SerNum <- as.character(subset_pms07$SerNum)
+
+# check 
+glimpse(subset_pms07$SerNum)
+
+# change variables to right type/class
+subset_pms07$Sex <- factor(subset_pms07$Sex)
+#subset_pms07$Age <- factor(subset_pms07$Age)
+subset_pms07$GenHeal <- factor(subset_pms07$GenHeal)
+subset_pms07$HowHap <- factor(subset_pms07$HowHap)
+subset_pms07$MenHeal <- factor(subset_pms07$MenHeal)
+subset_pms07$PaidJob <- factor(subset_pms07$PaidJob)
+subset_pms07$DefPsych <- factor(subset_pms07$DefPsych)
+
+
+# check for tranformation and amount of levels for all variables 
+glimpse(subset_pms07$Sex)
+glimpse(subset_pms07$Age)
+glimpse(subset_pms07$GenHeal)
+glimpse(subset_pms07$HowHap)
+glimpse(subset_pms07$MenHeal)
+glimpse(subset_pms07$PaidJob)
+glimpse(subset_pms07$DefPsych)
+
+
+# fix levels of factors and Rename levels of factor for easy reading 
+#Sex has 2 levels
+levels(subset_pms07$Sex) <-c("Male","Female")
+#General Health has 5 levels
+levels(subset_pms07$GenHeal) <-c("NA", "Excellent", "Very Good",
+                                 "Good", "Fair/Poor")
+#How Happy has 3 levels
+levels(subset_pms07$HowHap) <- c("NA", "Very Happy", 
+                                 "Fairly/Not too Happy")
+#Mental Health Condition has 2 levels
+levels(subset_pms07$MenHeal) <-c("Not Mentioned", "Mentioned")
+#Paid Job has 2 levels
+levels(subset_pms07$PaidJob) <-c("No", "Yes")
+#Definitive Psychosis has 2 levels
+levels(subset_pms07$DefPsych) <- c("No", "Yes")
+
+# Age has 80 levels? #
+# make Age into groups
+subset_pms07$Agegroup <-cut(subset_pms07$Age, 
+                            breaks=c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90), 
+                            right = FALSE)
+     
+
+# Make NAs explicit 
+subset_pms07 = subset_pms07 %>% mutate_if(is.factor,
+                                          fct_explicit_na,
+                                          na_level = "No Answer")
+
+
+
+# check it worked 
+glimpse(subset_pms07)
+summary(subset_pms07)
+```
+
+# Exploring Data 
+
+```{r}
+
+# overview of descriptives for df
+#describe(subset_pms07)
+
+
+#gender variable first
+
+# prop 
+prop.table(table(subset_pms07$Sex))
+
+#So this table tells us that 43.1% and 56.8% of the sample are 
+#male and female respectively, which sounds pretty reasonable.
+
+#The next step is to see if any age groups are over or under-represented 
+#in either of the genders. I’m going to use the package gmodels 
+#to produce these cross-tables:
+
+
+CrossTable(subset_pms07$Agegroup,
+           subset_pms07$Sex,prop.r=FALSE,prop.t=FALSE,
+           prop.chisq=FALSE)
+
+
+# largest group is males in the 40 - 50 age group 
+# visulisation 
+library(ggplot2)
+ggplot(subset_pms07,aes(x=Agegroup))+
+  geom_bar()+
+  facet_grid(~Sex)
+
+# exploring presence of poor mental health across genders.
+# would expect to see higher reporting in women, 
+#but more psychosis diagnosis in men. 
+CrossTable(subset_pms07$MenHeal,
+           subset_pms07$Sex,prop.r=FALSE,prop.t=FALSE,
+           prop.chisq=FALSE)
+
+#
+ggplot(subset_pms07,aes(x=MenHeal))+
+  geom_bar()+
+  facet_grid(~Sex)
+
+# Represention of psychosis in genders 
+
+CrossTable(subset_pms07$DefPsych,
+           subset_pms07$Sex,prop.r=FALSE,prop.t=FALSE,
+           prop.chisq=FALSE)
+# from this we can see that more females (17, .04%) than 
+#males (6, .02%) reported an episode of psychosis 
+#in the past year.
+
+# visualisation
+ggplot(subset_pms07,aes(x=DefPsych))+
+  geom_bar()+
+  facet_grid(~Sex)
+
+# exploring employment and mental health 
+
+prop.table(table(subset_pms07$PaidJob))
+prop.table(table(subset_pms07$MenHeal))
+
+# from this we can see of those who had a paid job 
+#(39.9%), 23.1% mentioned a mental health condition
+
+# bar chart 
+ggplot(subset_pms07,aes(x=PaidJob))+
+  geom_bar()+
+  facet_grid(~MenHeal)
+
+# 2-Way Cross Tabulation
+CrossTable(subset_pms07$Sex, subset_pms07$MenHeal)
+
+# 3-Way Frequency Table
+# gender by ever having a paid job and mentioned 
+# having a mental health condition 
+mytable <- table(subset_pms07$Sex, subset_pms07$PaidJob,
+                 subset_pms07$MenHeal)
+ftable(mytable)
+
+# from this we can see more females (47) than males (5) in a paid
+# job mentioned having a mental health condition.
+# More females who were not in a paid job (539) also mentioned 
+# having a mental health condition than men (236).
+
+
+
+
+# quick way to pull together row/column 
+# frequencies and proportions mental health and 
+# psychosis conditions vars
+table(subset_pms07$MenHeal, subset_pms07$DefPsych)
+
+#
+ggplot(subset_pms07,aes(x=MenHeal))+
+  geom_bar()+
+  facet_grid(~DefPsych)
+
+# tests of independance 
+# chi 
+# E.g. Test the null hypothesis whether the respondants paid job 
+# status is independent of their psychosis dx at .05 
+# significance level.
+chisq.test(subset_pms07$PaidJob, subset_pms07$DefPsych)
+
+# As the p-value 1.263 is greater than the .05 significance
+# level, we do not reject the null hypothesis that 
+# the respondants paid job status is independent of 
+# their psychosis diagnosis.
+
+# correlations 
+
+# t-tests
+
+# regressions 
+
+#library(synthpop)
+#Describes features of variables in a data frame 
+#relevant for synthesis
+#codebook.syn(subset_pms07)
+```
+
