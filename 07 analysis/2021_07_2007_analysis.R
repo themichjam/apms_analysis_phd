@@ -19,8 +19,6 @@ pacman::p_load(skimr,
        survey,
        srvyr)
 
-class(wt_ints1)
-
 # check packages
 pacman::p_loaded()
 
@@ -151,13 +149,14 @@ subset_pms07 %>%
       fill = fct_infreq(age10yr),
       label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) + # make y % and no decimal
   labs(title = "Survey Makeup (2007) \n by Age Group", 
-       x = 'Respondant Age Group', 
+       x = 'Respondant Age', 
        y = 'Percentage',
        fill = 'Age Group',
        caption = "(Test Footnote 2021)") + # footnote
@@ -189,10 +188,11 @@ filter(diag != 'No disord') %>% # drop fct levels you dont want shown
              fill = fct_infreq(diag),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
   #scale_x_discrete(guide = guide_axis(n.dodge=2))+ # dodge labels from each other
   #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))+ # drop some overlapping text
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
@@ -222,10 +222,11 @@ subset_pms07 %>%
              fill = fct_infreq(cc2a_y),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by Reciept of Community Care", 
        x = 'Recieved Care', 
@@ -249,21 +250,31 @@ subset_pms07 %>%
              fill = fct_infreq(dvilo4a),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by Employment Status", 
        x = 'Respondant Status', 
        y = 'Percentage',
        fill = 'Employment Type',
-       caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 4, y = .6, size = 3, label = "(total n = 7,403)") +
-  annotate("text", x = 4, y = .5, size = 3, label = "n = 7,402") +
+       caption = "(Test Footnote 2021)") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust=1)) +
+  annotate("text", x = 4, y = .6, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 4, y = .5, size = 3, label = "n = 7,402")
+  
 
+# Renaming factor levels dplyr
+subset_pms07$eqvinc5 <- recode_factor(subset_pms07$eqvinc5, 
+                                      "3rd quintile (>=16,195 <?24,700)" = "Third (16,195-24,700)",
+                                      "highest quintile (>=?40,384)" = "Highest (>40,384)",
+                                      "Lowest quintile (<?10,575)" = "Lowest (<10,575)",
+                                      "2nd quintile (>=?24, 700 <?40,384)" = "Second (24,700-40,384)",
+                                      "4th quintile (>=?10,575 <?16,195)" = "Fourth (10,575-16,195)")
 
 # Equivalised income quintiles
 subset_pms07 %>%
@@ -274,21 +285,26 @@ subset_pms07 %>%
              fill = fct_infreq(eqvinc5),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +  
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by Equivalised income quintiles",
        x = 'Equivalised income quintiles', 
        y = 'Percentage',
        fill = 'Income Quintile',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 5, y = .3, size = 3, label = "n = 5,872") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5)) 
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust=1)) +
+  annotate("text", x = 5, y = .3, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 5, y = .25, size = 3, label = "n = 5,872")
 
-
+# Renaming factor levels dplyr
+subset_pms07$ethnic5 <- recode_factor(subset_pms07$ethnic5, 
+                                      "South Asian (Indian, Pakistani or Bangladeshi)" = "South Asian")
 # Ethnic Group
 subset_pms07 %>%
   filter(!ethnic5 %in% c("Don't know", "No answer/refused")) %>%
@@ -298,21 +314,28 @@ subset_pms07 %>%
              fill = fct_infreq(ethnic5),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) + 
   labs(title="Survey Makeup \n by Ethnic Group (2007)", 
-       x = 'Respondant Ethnic Group', 
+       x = 'Respondant Ethnicity', 
        y = 'Percentage',
        fill = 'Ethnic Group',
-       caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 5.5, y = .9, size = 3, label = "n = 5,353") +
+       caption = "(Test Footnote 2021)") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5)) 
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust=1)) +
+  annotate("text", x = 5, y = .9, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 5, y = .8, size = 3, label = "n = 5,353")
 
 
+# Renaming factor levels dplyr
+subset_pms07$edqual5 <- recode_factor(subset_pms07$edqual5, 
+                                      "No qualifications" = "None",
+                                      "Teaching, HND, nursing" = "Vocaational*")
 # Highest Qualification
 subset_pms07 %>%
   filter(!edqual5 %in% c("Don't know", "No answer/refused")) %>% # drop more than 2 levels
@@ -322,18 +345,21 @@ subset_pms07 %>%
              fill = fct_infreq(edqual5),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup \n by Qualification (2007)", 
        x = 'Respondant Highest Qualification', 
        y = 'Percentage', fill = 'Qualification',
-       caption = "(Test Footnote 2021)") +
-  annotate("text", x = 6.5, y = .4, size = 3, label = "n = 7,235") +
+       caption = "* Includes: Nursing, Teaching, HND") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust=1)) +
+  annotate("text", x = 6, y = .4, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 6, y = .35, size = 3, label = "n = 7,235") 
 
 # Marital Status
 subset_pms07 %>%
@@ -343,18 +369,21 @@ subset_pms07 %>%
              fill = fct_infreq(res_mar_df),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by Marital Status", 
        x = 'Respondant Status', 
        y = 'Percentage', fill = 'Marital Status',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 6, y = .5, size = 3, label = "n = 7,235") +
-theme(plot.caption = element_text(hjust = 0),
-      plot.title = element_text(hjust = 0.5)) 
+  theme(plot.caption = element_text(hjust = 0),
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 6, y = .5, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 6, y = .45, size = 3, label = "n = 7,235")
+
 
 
 # Number of Common Mental Disorders
@@ -365,19 +394,22 @@ subset_pms07 %>%
              fill = fct_infreq(numdis),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title = "Survey Makeup (2007) \n by Number of CMDs Diagnosed", 
-       x = 'Respondant Amount', 
+       x = 'Respondant Diagnosis', 
        y = 'Percentage',
        fill = 'Number of CMD',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 3.3, y = .9, size = 3, label = "n = 7,403") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 3, y = .9, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 3, y = .80, size = 3, label = "n = 7,403")
+  
 
 # Find total of variable 
 
@@ -389,9 +421,10 @@ subset_pms07 %>%
              fill = fct_infreq(gor06),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) +
   coord_flip() +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
@@ -400,46 +433,58 @@ subset_pms07 %>%
        y = 'Percentage',
       fill = 'Region',
       caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 9.5, y = .16, size = 3, label = "n = 7,403") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5)) 
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 9.5, y = .15, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 9, y = .15, size = 3, label = "n = 7,403")
+  
 
-
+# Renaming factor levels dplyr
+subset_pms07$trtment <- recode_factor(subset_pms07$trtment, 
+                                      "no treatment" = "None",
+                                      "medication only" = "Medication only",
+                                      "counselling only" = "Counselling only",
+                                      "both medication and counselling" = "Both")
 # Treatment for CMDs
 subset_pms07 %>%
+  filter(trtment != "Don't know") %>% 
   drop_na() %>%
   ggplot(aes(x = fct_infreq(trtment),
              y = prop.table(stat(count)),
              fill = fct_infreq(trtment),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by CMD Treatment (2007)", 
        x = 'Treatment Group', 
        y = 'Percentage',
        fill = 'Treatment',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 5, y = 1, size = 3, label = "n = 7,382") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 4, y = 1, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 4, y = .95, size = 3, label = "n = 7,382") 
+  
 
 
 # Ever Took Drugs
 subset_pms07 %>%
-  filter(drugever != "No answer/refused") %>%
+  filter(!drugever %in% c("Missing data", "No answer/refused", "Don't know")) %>%
   drop_na() %>%
   ggplot(aes(x = fct_infreq(drugever),
              y = prop.table(stat(count)),
              fill = fct_infreq(drugever),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
             size = 3) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
   labs(title="Survey Makeup (2007) \n by Drug Use", 
@@ -447,9 +492,11 @@ subset_pms07 %>%
        y = 'Percentage',
        fill = 'Drug Use',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 2.3, y = .7, size = 3, label = "n = 7,357") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 2.3, y = .90, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 2.3, y = .85, size = 3, label = "n = 7,357")
+  
 
 # Find total of variable 
 
@@ -461,19 +508,22 @@ subset_pms07 %>%
              fill = fct_infreq(res_sex),
              label = scales::percent(prop.table(stat(count))))) +
   geom_bar() + 
-  geom_text(stat = 'count',
-            position = position_dodge(.9), 
-            vjust = -0.5, 
-            size = 3) + 
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
   scale_y_continuous(labels = scales::percent) +
   labs(title="Survey Makeup (2007)\n by Sex", 
        x = 'Respondant Sex', 
        y = 'Percentage',
        fill = 'Sex',
        caption = "(Test Footnote 2021)") + 
-  annotate("text", x = 2.3, y = .7, size = 3, label = "n = 7,403") +
   theme(plot.caption = element_text(hjust = 0),
-        plot.title = element_text(hjust = 0.5)) 
+        plot.title = element_text(hjust = 0.5)) +
+  annotate("text", x = 2.3, y = .70, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 2.3, y = .65, size = 3, label = "n = 7,403")
+   
 
 #### Bivariate ####
 

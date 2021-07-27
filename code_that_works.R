@@ -251,3 +251,37 @@ subset_pms07 %>% # your dataset
 #  bold_labels()
 
 ## make y percentage 100% - limits = c(0,1)
+
+
+# Common Mental Disorder Groups
+subset_pms07 %>%
+  filter(diag != 'No disord') %>% # drop fct levels you dont want shown
+  drop_na() %>%
+  ggplot(aes(x = fct_infreq(diag),
+             y = prop.table(stat(count)),
+             fill = fct_infreq(diag),
+             label = scales::percent(prop.table(stat(count))))) +
+  geom_bar() +
+  geom_text(aes(label = sprintf('%s (%.1f%%)', after_stat(count), after_stat(count / sum(count) * 100))), # show counts & %
+            stat='count',
+            position = position_dodge(.9),
+            vjust = -1,
+            size = 3) +
+            #stat = 'count', # just %
+            #position = position_dodge(.9), # just %
+            #vjust = -0.5, # just %
+            #size = 3) + # just v%
+  #scale_x_discrete(guide = guide_axis(n.dodge=2))+ # dodge labels from each other
+  #scale_x_discrete(guide = guide_axis(check.overlap = TRUE))+ # drop some overlapping text
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
+  labs(title="Survey Makeup (2007) \n by Common Mental Disorder Group", 
+       x = 'Respondant CMD Group', 
+       y = 'Percentage',
+       fill = 'Condition',
+       caption = "(Test Footnote 2021)") +
+  theme(plot.caption = element_text(hjust = 0),
+        plot.title = element_text(hjust = 0.5),
+        #axis.text.x = element_text(size = 7), # change text size
+        axis.text.x = element_text(angle = 45, hjust=1)) + # angle text
+  annotate("text", x = 9.3, y = .55, size = 3, label = "(total n = 7,403)") +
+  annotate("text", x = 9.3, y = .50, size = 3, label = "n = 1,277")
