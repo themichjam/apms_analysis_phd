@@ -1,0 +1,21 @@
+---
+title: "ragg render plots & figs"
+author: "Michelle K Jamieson"
+date: "28/07/2021"
+output: html_document
+---
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+#Create folder to save in [main=plots/subfolder=200, filename]
+ragg::agg_png(here::here("plots/2000", "testplot.png"))
+    dev.off()
+    
+#OR
+    
+library(here)
+ggsave(filename = here("figs","fig1.png")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

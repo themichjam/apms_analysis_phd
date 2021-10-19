@@ -1,0 +1,26 @@
+---
+title: "202109"
+author: "M K Jamieson"
+date: 
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: textmate
+---
+
+
+```{r setup m, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r child = '00_test.Rmd'}
+
+```
+
+```{r child = '01_test.Rmd'}
+
+```
