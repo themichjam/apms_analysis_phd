@@ -15,18 +15,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-tbl wgt unw sdo to do, 
-
-Factors (4) – you still need to control the ordering of levels within the factor so they fall in more logical order (‘levels’ subcommand) – see figure on income quintiles, e.g.
-
-Sorting unwanted NAs (3) – not sure this is working, see e.g. income quintiles where ‘Item not applicable’ still appears unless filtered out. Do some checks at this stage to prove to yourself it is doing what you expected.
-
-Weights/survey design (s.5) –Reading up a bit, I found this page v. clear and helpful: https://stats.idre.ucla.edu/r/seminars/survey-data-analysis-with-r/. The main thing I took from it was the need to produce tables, figs etc. using other commands from the ‘survey’ package (svytable, svyhist, etc.). The svydesign command which you use creates an object which describes the complex design, but you then need to use the svy*** commands to apply that design object to the data correctly. You don’t seem to be doing it this way but maybe you’ve got a different way of achieving the same thing? 
-
-At a few points, I see you use ‘ggsurvey’ for figures and that does take the svydesign object BUT (v unhelpfully) the small print for the documentation says that this only works with weights, not with complex design: (https://www.rdocumentation.org/packages/questionr/versions/0.7.4/topics/ggsurvey – under ‘Details’). 
-
-There are ‘survey’ commands for modelling as well which you’d also need to use (s.8). 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -161,6 +149,8 @@ table(subset_pms07$diag)
 # Convert unwanted levels to NA
 # write out all the offending strings of different NAs used
 na_strings <- c("No answer/refused",
+                "NA",
+                "N/A",
                 "Don't know",
                 "Missing data",
                 "Proxy",
@@ -169,16 +159,22 @@ na_strings <- c("No answer/refused",
                 "Don't know",
                 "Item not applicable")
 
-#Then you write ~.x %in% na_strings - which reads as “does this 
-#value occur in the list of NA strings”.
-subset_pms07 %>%
-  replace_with_na_all(condition = ~.x %in% na_strings)
+# before na
+table(subset_pms07$acidever)
+
+#replace unwanted answers/typos with NA
+subset_pms07 <- subset_pms07 %>%
+  mutate(across(everything(), 
+                ~ replace(., . %in% c(na_strings), NA_character_))) %>% 
+  type.convert(as.is = TRUE) %>% #drop_na() running the drop_na() results in 0 observations
 
 
-# convert df back to factor 
-subset_pms07 %>% mutate_if(is.character, as.factor)
-
+# check str after
+table(subset_pms07$acidever)
+table(subset_pms07$diag)
+str(subset_pms07)
 ```
+
 # Manual Sorting of Factors
 ```{r fct lvls}
 # Renaming factor levels dplyr
@@ -937,9 +933,12 @@ mod1 %>%
 
 
 
-# Issues 
+## Follow up
 
-1. Can't seem to filter when plotting with a weighted survey object. 
+1. Why are factor levels showing as NULL?
+2. Running drop_na() after converting unwanted typos/answers results in while df showing 0 observations?
+ 
+
 
 # References & Session Info
 ```{r package refs}

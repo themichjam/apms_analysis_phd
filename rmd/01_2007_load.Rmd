@@ -1,0 +1,57 @@
+---
+title: "2007 Analysis 2021-10"
+author: "Michelle Jamieson"
+date: 'Last run `r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: textmate
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Packages & Data
+```{r load}
+
+## 2007 apms analysis ##
+
+#install.packages if not already
+# load libraries
+pacman::p_load(collapse,
+               DiagrammeR,
+               finalfit,
+               forcats,
+               ggplot2,
+               ggpubr,
+               gtsummary,
+               haven,
+               here,
+               janitor,
+               knitr,
+               naniar,
+               questionr,
+               reprex,
+               skimr,
+               srvyr,
+               survey,
+               tidyverse)
+
+# check packages
+pacman::p_loaded()
+here()
+
+# read in 2007
+source_pms07 <- read_sav(here("./data/raw/apms07arch.sav",
+                              user_na = TRUE)) %>%
+  as_factor() 
+
+```

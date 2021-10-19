@@ -1,0 +1,26 @@
+---  
+title: "2007 Analysis 2021-10"
+author: "Michelle Jamieson"
+date: 'Last run `r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: textmate
+editor_options: 
+  chunk_output_type: console
+---
+```{r wd}
+
+
+``` 
+
+```{r child = '01_2007_load.Rmd'}
+```
+
+```{r child = '02_2007_subset.Rmd'}
+```

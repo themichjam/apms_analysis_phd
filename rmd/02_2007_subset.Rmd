@@ -1,0 +1,107 @@
+---
+title: "2007 Analysis 2021-10"
+author: "Michelle Jamieson"
+date: 'Last run `r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: textmate
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Subset of Interest & Cleaning
+```{r subset}
+# Variables of interest subset 2007
+subset_pms07 <- source_pms07 %>% 
+  dplyr::select("pserial","trtment","eqvinc5","diag","CISRFOUR","ResSex"                 ,"Health6","Language","Age10yr",
+                "Age20yr","ETHNIC5","Origin","EDQUAL5","AnyQuals",
+                "HiQuals","ResMarDF",
+                "DVILO4a","DVPrac","Care1","Care2","Care3","Care4",
+                "Care5","Everwk","yearjbl","JbReas","Looked",
+                "YInAct","LookStop","LookSto2","Stat","Solo",
+                "HrsWeek","PTWkHour","EmpStY","LookNot1","LookNot2",
+                "LookNot3","DVLastWk","NotWk","WkShel1","HrsWork",
+                "LookSto3","DiffJob","WkShel2","WkShel3","SEmpStY",
+                "LookNow","LookAtAl","JobstM","EmpNo","Manage",
+                "FtPtWk","NotWk","SEG","SC","SrcInc1","SrcInc2",
+                "SrcInc3","SrcInc4","SrcInc5","SrcInc6","Gross4",
+                "Gross4a","Ten1","LLord","SF6","SF7","SF9","SF11",
+                "SF12","CONHOMD","IMon","FollUpGrp",
+                "eligible","Stage2","Origin","DVPrac","Care1","Care2",
+                "Care3","Care4","Care5","Medic","CnslHav","CnslTak",
+                "CnslLng","DocYear","DocPsyc","PMatNum","DocTalk",
+                "DocWeeks","InWhy","OutWhy","DayY","DayWht1",
+                "DayWht2","DayWht3","DayWht4","CC2aY",
+                "CC2Y1","CC2Y2","CC2Y3","CC2Y5","CC2Y6","CC2Y7",
+                "CC2Y8","CC2Y9","MentHos","Ten1","Gross4a","qimd",
+                "gor06","newsha","SF1","Happy","tenure","newten",
+                "hhdtype","DISsex","DISeth","DISrel","DISAge",
+                "DISmen","DISphy",
+                "DISsori","CISRFOUR","panic","GAD","madd","OCD",
+                "phob","dep","neurotic","nosymp","numdis",
+                "PTSDever","MajorT16","PTSDcom","PTSDPos",
+                "suicthwk","suicthyr","suicthlf","DSHlife",
+                "suicatwk","suicatyr","suicatlf","DSHtry","suihfri",
+                "suihhos","suihcom","suihhel","suihoth","DSH5",
+                "DSHharm","DSH9","DSH10","PsycProb","Psycdis",
+                "Psycdis_wt","BPDPH2","bdpd_wt","ASPDPH2","aspd_wt",
+                "DVADHD1","DVADHD2","DVADHD4","scoff2","EDImpact",
+                "bmigp4","DVAudit1","AUDITgp","DRNKPROB","SADQCSC",
+                "SADQGP","AUDSAD2","Cannever","Cannyear","AMPHEVER",
+                "AMPHYEAR","COCAEVER","CRACEVER","CRACYEAR",
+                "ECSTEVER","ECSTYEAR","HEROEVER","HEROYEAR",
+                "ACIDEVER","ACIDYEAR","MUSHEVER","MUSHYEAR",
+                "METHEVER","METHYEAR","TRANEVER","TRANYEAR",
+                "AMYLEVER","AMYLYEAR","ANABEVER",
+                "ANABYEAR","GLUEEVER","GLUEYEAR","DRUGEVER",
+                "DRUGYEAR","DRUGDEP",
+                "DRUGDEP2","GamYR","dsmscgr","dsmprob","dsmpath",
+                "numdiag","numdiag4","LCA","cluster1","cluster2",
+                "cluster3","cluster4","cluster5","cluster6",
+                "MedPsyc","MedDep","MedHyp","MedAnx","MedADHD",
+                "anymed","Doc2Wks","DocPsyc","INQTRMEN","OUTQTRME",
+                "PSYCTHER","COGTHER","ARTTHER","SOCTRAIN","MARITHER"
+                ,"SEXTHER","COUNSEL","OTHTHER","OTHTHER","anyther",
+                "trtment","DAYCOMYR","PSYTRTYR","PSYLGTYR",
+                "CPNYR","CLDNYR","OTHNSEYR","SOCWRKYR","CPNYR",
+                "ERI3","SFQA","SFQB","SFQC","SFQD",
+                "SFQE","SFQF","SFQG","SFQH","DLSS4","DLSS5",
+                "PrimGrp","ChldInst","LACare","BothMaPa",
+                "YNotBoth","MaOrPa","AnyChild","NoChild",
+                "InDebt1","InDebt6",
+                "SFHELPYR","HMHELPYR","OREACHYR","anyccar","anyhlca"
+                ,"anydaca","wt_ints1","ipsu_0714","istrata_0714",
+                "eqvinc5","ptsdlong","PTSDarms","MajorT16","ResAge",
+                "cluster","area") %>%
+  janitor::clean_names() %>%
+  janitor::remove_empty("cols") %>%
+  janitor::remove_empty("rows") %>%
+  mutate(across(where(is.factor), as.character))
+
+head(subset_pms07, 5)
+
+
+# Arrange alphabetically and make 'colnames' lowercase
+
+subset_pms07 <-subset_pms07[,order(colnames(subset_pms07))] %>% rename_all(tolower)
+
+# Check names
+head(subset_pms07, 5)
+table(subset_pms07$diag)
+class(subset_pms07$diag)
+
+# remove source df
+remove(source_pms07)
+
+table(subset_pms07$diag)
+```
